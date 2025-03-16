@@ -1,14 +1,10 @@
-import { Stack } from "expo-router";
-import { LogBox } from "react-native";
+import { Tabs } from "expo-router";
 
-LogBox.ignoreAllLogs(true);
-
-export default function RootLayout() {
+export default function TabsLayout() {
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="components" options={{ headerShown: false }} />
-      <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-    </Stack>
+    <Tabs>
+      <Tabs.Screen name="(profile)" options={{ title: "👨‍✈️Profile", tabBarIcon: () => <></>, headerShown: false }} />
+      <Tabs.Screen name="(settings)" options={{ title: " ⚙️ Settings", tabBarIcon: () => <></>, headerShown: false }} />
+    </Tabs>
   )
 }
