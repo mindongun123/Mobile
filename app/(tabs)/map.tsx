@@ -1,7 +1,9 @@
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { View, Button, StyleSheet, Text } from "react-native";
 
 export default function Profile() {
+    const navigation = useNavigation();
+
     return (
         <View style={styles.container}>
             <Button title="Thông báo" onPress={() => router.push("/screens/profile/notification")} />
