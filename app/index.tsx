@@ -5,7 +5,7 @@ export default function Index() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>APP HOTEL</Text>
-      <Button title="Đăng nhập" onPress={() => router.push("/(tabs)")} />
+      <Button title="Đăng nhập" onPress={() => router.push("/(tabs)/room")} />
     </View>
   );
 }

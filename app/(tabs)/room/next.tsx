@@ -1,10 +1,12 @@
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { StyleSheet, View, Text, Button } from "react-native";
 
-export default function Hello() {
+export default function RoomIndex() {
+  const router = useRouter();
   return (
     <View style={styles.container}>
-            <Button title="Index" onPress={() => router.push("/indexs")} />
+      <Button title="Search" onPress={() => router.navigate("/room/search")} />
+      <Button title="Index" onPress={() => router.navigate("/room")} />
     </View>
   );
 }
