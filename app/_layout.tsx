@@ -1,10 +1,6 @@
-import { Tabs } from "expo-router";
+import { Stack } from "expo-router";
+import React from "react";
 
-export default function TabsLayout() {
-  return (
-    <Tabs>
-      <Tabs.Screen name="(profile)" options={{ title: "👨‍✈️Profile", tabBarIcon: () => <></>, headerShown: false }} />
-      <Tabs.Screen name="(settings)" options={{ title: " ⚙️ Settings", tabBarIcon: () => <></>, headerShown: false }} />
-    </Tabs>
-  )
+export default function RootLayout() {
+  return <Stack />;
 }
