@@ -1,47 +1,131 @@
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Text } from 'react-native';
-import { WebView } from 'react-native-webview';
-import * as FileSystem from 'expo-file-system';
-import { Asset } from 'expo-asset';
+import React from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import MapView, { Callout, Marker, UrlTile } from 'react-native-maps';
 
-export default function GoongMap() {
-  const [htmlContent, setHtmlContent] = useState<string | null>(null);
+const MapScreen = () => {
+  const GOONG_MAP_API_KEY = 'CqJGWaabFV9MNodiMThwxZpkhBLgyZcalsD93NHG';
 
-  useEffect(() => {
-    const loadHtml = async () => {
-      const asset = Asset.fromURI(FileSystem.documentDirectory + 'map.html');
-
-      // Nếu file chưa có trong documentDirectory thì copy từ bundle
-      const localPath = Asset.fromModule(require('../assets/map.html'));
-      await localPath.downloadAsync();
-
-      const content = await FileSystem.readAsStringAsync(localPath.localUri || '', {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
-
-      const replaced = content.replace('%GOONG_API_KEY%', 'duTSfwuLT4ruFKNoLss3uIvXftHpl6ywuIDjsYdn');
-      setHtmlContent(replaced);
-    };
-
-    loadHtml();
-  }, []);
-
-  if (!htmlContent) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  const locations = [
+    {
+      id: '1',
+      title: 'AEON Mall',
+      rate: 4.5,
+      description: 'AEON Mall is a large shopping mall in Hanoi.',
+      latitude: 20.989685,
+      longitude: 105.7514914,
+      price: 100000,
+    },
+    {
+      id: '2',
+      title: 'Lotte Mart',
+      rate: 4.0,
+      description: 'Lotte Mart is a popular shopping destination in Hanoi.',
+      latitude: 21.0759511,
+      longitude: 105.8100871,
+      price: 125600,
+    },
+    {
+      id: '3',
+      title: 'Vincom Center',
+      rate: 4.7,
+      description: 'Vincom Center is a high-end shopping mall in Hanoi.',
+      latitude: 21.0108794,
+      longitude: 105.773362,
+      price: 150400,
+    },
+  ];
 
   return (
-    <View>
-      <Text>Hello</Text>
-      <WebView
-        originWhitelist={['*']}
-        source={{ html: htmlContent }}
-        style={{ flex: 1 }}
-      />
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 20.989685,
+          longitude: 105.7514914,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      >
+        <UrlTile
+          urlTemplate={`https://tiles.goong.io/assets/goong_map_web/{z}/{x}/{y}.png?api_key=${GOONG_MAP_API_KEY}`}
+          maximumZ={20}
+          flipY={false}
+        />
+
+        {locations.map((loc) => (
+          <Marker
+            key={loc.id}
+            coordinate={{ latitude: loc.latitude, longitude: loc.longitude }}
+            title={loc.title}
+            description={loc.description}
+            pinColor="blue"
+          >
+            <View style={styles.customMarker}>
+              <Text style={styles.markerText}>{loc.title}{"\n"}<Text style={styles.price}>{loc.price} {"đ"}</Text></Text>
+              <Image
+                source={require('../assets/images/location.png')}
+                style={styles.markerIcon}
+              />
+            </View>
+            <Callout>
+              <View style={styles.calloutContainer}>
+                <Text style={styles.calloutTitle}>{loc.title}</Text>
+                <Text>{loc.rate} ⭐</Text>
+                <Text>{loc.description}</Text>
+              </View>
+            </Callout>
+          </Marker>
+        ))}
+      </MapView>
     </View>
   );
-}
+};
+
+export default MapScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    flex: 1,
+  },
+  customMarker: {
+    alignItems: 'center',
+  },
+  markerText: {
+    fontSize: 12,
+    color: '#000',
+    fontWeight: 'bold',
+    marginBottom: 2,
+    backgroundColor: 'white',
+    paddingHorizontal: 4,
+    borderRadius: 4,
+    elevation: 2,
+    textAlign: 'center',
+  },
+  price: {
+    fontSize: 12,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+  markerIcon: {
+    width: 24,
+    height: 24,
+  },
+
+  calloutContainer: {
+    padding: 5,
+    backgroundColor: 'white',
+    borderRadius: 5,
+  },
+  calloutTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  calloutPrice: {
+    fontSize: 12,
+    color: '#007AFF',
+  },
+});
