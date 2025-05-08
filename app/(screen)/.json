@@ -1,0 +1,27 @@
+{
+    "geocoded_waypoints": [
+        {
+            "geocoder_status": "OK",
+            "place_id": "mQdwl35McXZArXQNo1qrRECOziTSnYJnjQNWnHyiObutsrZBtFLPu42yhWCmgY--TcKFcP6BYjpJ01ls2uHKVyG2gP1W4boH6dbFHvZFhkfh0U1SLpweBkXajXCyRBurR"
+        },
+        {
+            "geocoder_status": "OK",
+            "place_id": "nvwkUKvmbQp8r20QoFCSsXidcgS3V6fZdKxmO6Buldh5vjckmJW7CXy-NluqxYF4n4R6ErcKnXpLrVAzmH4IJmmOHSDmclYH7eb1LX51tnfR4h1gLqwt8nXqvUCCdjQrd"
+        }
+    ],
+    "routes": [
+        {
+            "bounds": [Object
+            ],
+            "legs": [Array
+            ],
+            "overview_polyline": [Object
+            ],
+            "summary": "",
+            "warnings": [Array
+            ],
+            "waypoint_order": [Array
+            ]
+        }
+    ]
+}

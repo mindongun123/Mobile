@@ -1,44 +1,64 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Text, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Text, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 const GoongMapComponent = () => {
   const [routeCoordinates, setRouteCoordinates] = useState<{ latitude: number; longitude: number }[]>([]);
+  const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const mapRef = useRef(null);
-
-  // Kích thước của bản đồ
   const { width, height } = Dimensions.get('window');
 
-  
+  // Lấy vị trí hiện tại
   useEffect(() => {
-    // URL Goong API với API Key của bạn
-    const url = `https://rsapi.goong.io/direction?origin=21.0759511%2C105.8100871&destination=20.989685%2C105.7514914&vehicle=car&api_key=1xR36Z0rKiXkXcewt25CPlN0d6Ojj4uH0zAQVKAL`;
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Không có quyền truy cập vị trí');
+        return;
+      }
 
-    // Lấy dữ liệu từ Goong API
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      console.log('Vị trí hiện tại:', latitude, longitude);
+      setCurrentLocation({ latitude, longitude });
+    })();
+  }, []);
+
+  // Khi currentLocation có giá trị, mới fetch dữ liệu tuyến đường
+  useEffect(() => {
+    if (!currentLocation) return;
+
+    const fetchRoute = async () => {
+      const { latitude, longitude } = currentLocation;
+      const url = `https://rsapi.goong.io/direction?origin=${latitude},${longitude}&destination=20.989685,105.7514914&vehicle=car&api_key=1xR36Z0rKiXkXcewt25CPlN0d6Ojj4uH0zAQVKAL`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
         const encodedPolyline = data.routes[0].overview_polyline.points;
         const coordinates = decodePolyline(encodedPolyline);
         setRouteCoordinates(coordinates);
-      })
-      .catch((error) => console.error('Error fetching directions:', error));
-  }, []);
+      } catch (error) {
+        console.error('Lỗi gọi API Goong:', error);
+      }
+    };
 
-  // Hàm giải mã polyline
+    fetchRoute();
+  }, [currentLocation]);
+
   const decodePolyline = (encoded: string) => {
     let points = [];
-    let index = 0, len = encoded.length;
-    let lat = 0, lng = 0;
+    let index = 0, lat = 0, lng = 0;
 
-    while (index < len) {
+    while (index < encoded.length) {
       let b, shift = 0, result = 0;
       do {
         b = encoded.charCodeAt(index++) - 63;
         result |= (b & 0x1f) << shift;
         shift += 5;
       } while (b >= 0x20);
-      let dLat = result & 0x01 ? ~(result >> 1) : (result >> 1);
+      let dLat = result & 1 ? ~(result >> 1) : (result >> 1);
       lat += dLat;
 
       shift = 0;
@@ -48,39 +68,48 @@ const GoongMapComponent = () => {
         result |= (b & 0x1f) << shift;
         shift += 5;
       } while (b >= 0x20);
-      let dLng = result & 0x01 ? ~(result >> 1) : (result >> 1);
+      let dLng = result & 1 ? ~(result >> 1) : (result >> 1);
       lng += dLng;
 
-      points.push({ latitude: lat / 1E5, longitude: lng / 1E5 });
+      points.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
     }
+
     return points;
   };
 
+  // ⏳ Nếu chưa có vị trí hiện tại → loading
+  if (!currentLocation) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="blue" />
+        <Text>Đang xác định vị trí của bạn...</Text>
+      </View>
+    );
+  }
+
+  // ✅ Khi đã có vị trí → hiển thị map
   return (
     <View style={{ flex: 1 }}>
       <Text style={{ textAlign: 'center', padding: 10 }}>
-        Tuyến đường từ điểm xuất phát đến đích
+        Tuyến đường từ vị trí của bạn đến đích
       </Text>
       <MapView
         ref={mapRef}
         style={{ width, height }}
         initialRegion={{
-          latitude: 21.0759511,
-          longitude: 105.8100871,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
       >
-        {/* Vẽ tuyến đường từ polyline */}
         <Polyline
           coordinates={routeCoordinates}
           strokeColor="#FF0000"
           strokeWidth={4}
         />
-        {/* Đánh dấu điểm xuất phát */}
-        <Marker coordinate={{ latitude: 21.0759511, longitude: 105.8100871 }} title="Bắt đầu" pinColor='blue' />
-        {/* Đánh dấu điểm đích */}
-        <Marker coordinate={{ latitude: 20.989685, longitude: 105.7514914 }} title="Đích" />
+        <Marker coordinate={currentLocation} title="Bạn đang ở đây" pinColor="green" />
+        <Marker coordinate={{ latitude: 20.989685, longitude: 105.7514914 }} title="Đích đến" />
       </MapView>
     </View>
   );
