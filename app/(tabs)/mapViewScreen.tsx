@@ -1,9 +1,25 @@
 import { router } from 'expo-router';
-import React from 'react';
-import { Button, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Callout, Marker, UrlTile } from 'react-native-maps';
+import React, { useState } from 'react';
+import {
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import MapView, { Marker, UrlTile } from 'react-native-maps';
 
 const MapViewScreen = () => {
+  const [selectedLocation, setSelectedLocation] = useState<{
+    id: string;
+    title: string;
+    rate: number;
+    description: string;
+    latitude: number;
+    longitude: number;
+    price: number;
+  } | null>(null);
 
   const GOONG_MAP_API_KEY = 'CqJGWaabFV9MNodiMThwxZpkhBLgyZcalsD93NHG';
 
@@ -49,7 +65,7 @@ const MapViewScreen = () => {
         }}
       >
         <UrlTile
-          urlTemplate={`https://tiles.goong.io/assets/goong_map_web/{z}/{x}/{y}.png?api_key=${GOONG_MAP_API_KEY}`}
+          urlTemplate={'https://tiles.goong.io/assets/goong_map_web/{z}/{x}/{y}.png?api_key=${GOONG_MAP_API_KEY}'}
           maximumZ={20}
           flipY={false}
         />
@@ -58,30 +74,41 @@ const MapViewScreen = () => {
           <Marker
             key={loc.id}
             coordinate={{ latitude: loc.latitude, longitude: loc.longitude }}
-            title={loc.title}
-            description={loc.description}
-            pinColor="blue"
+            onPress={() => setSelectedLocation(loc)}
           >
             <View style={styles.customMarker}>
-              <Text style={styles.markerText}>{loc.title}{"\n"}<Text style={styles.price}>{loc.price} {"đ"}</Text></Text>
-              <Image
-                source={require('../../assets/images/location.png')}
-                style={styles.markerIcon}
-              />
-            </View>
-            <Callout onPress={() => {
-              router.push("/(screen)/mapDirectionsScreen");
-            }}>
-              <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{loc.title}</Text>
-                <Text>{loc.rate} ⭐</Text>
-                <Text>{loc.description}</Text>
-
+              <View style={styles.markerDot} />
+              <View style={{ backgroundColor: 'white', borderRadius: 4 }}>
+                <Text style={styles.markerText}>{loc.title}</Text>
+                <Text style={styles.price}>{loc.price} đ</Text>
               </View>
-            </Callout>
+            </View>
           </Marker>
         ))}
       </MapView>
+
+      {/* Hiển thị thông tin khi Marker được bấm */}
+      <Modal visible={!!selectedLocation} transparent animationType="fade">
+        <TouchableWithoutFeedback onPress={() => setSelectedLocation(null)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>{selectedLocation?.title}</Text>
+              <Text>{selectedLocation?.rate} ⭐</Text>
+              <Text>{selectedLocation?.description}</Text>
+              <Text style={styles.cardPrice}>{selectedLocation?.price?.toLocaleString()} đ</Text>
+              <Pressable
+                onPress={() => {
+                  setSelectedLocation(null);
+                  router.push('/(screen)/mapDirectionsScreen');
+                }}
+                style={styles.cardButton}
+              >
+                <Text style={styles.cardButtonText}>Xem khách sạn</Text>
+              </Pressable>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -98,39 +125,67 @@ const styles = StyleSheet.create({
   customMarker: {
     alignItems: 'center',
   },
+  markerDot: {
+    width: 16,
+    height: 16,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
   markerText: {
-    fontSize: 12,
-    color: '#000',
-    fontWeight: 'bold',
-    marginBottom: 2,
-    backgroundColor: 'white',
+    fontSize: 14,
     paddingHorizontal: 4,
     borderRadius: 4,
+    marginTop: 4,
+    color: '#000',
     elevation: 2,
     textAlign: 'center',
+    fontWeight: '600',
   },
   price: {
-    fontSize: 12,
+    paddingLeft: 6,
+    fontSize: 12, 
     color: '#007AFF',
     fontWeight: 'bold',
   },
-  markerIcon: {
-    width: 24,
-    height: 24,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-
-  calloutContainer: {
-    padding: 5,
+  card: {
     backgroundColor: 'white',
-    borderRadius: 5,
+    padding: 16,
+    borderRadius: 10,
+    width: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
   },
-  calloutTitle: {
-    fontSize: 14,
+  cardTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    marginBottom: 6,
   },
-  calloutPrice: {
-    fontSize: 12,
+  cardPrice: {
+    fontSize: 14,
     color: '#007AFF',
+    marginTop: 8,
+  },
+  cardButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    borderRadius: 6,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  cardButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
