@@ -31,7 +31,7 @@ const MapViewScreen = () => {
       description: 'AEON Mall is a large shopping mall in Hanoi.',
       latitude: 20.989685,
       longitude: 105.7514914,
-      price: 100000,
+      price: 1000000,
     },
     {
       id: '2',
@@ -40,7 +40,7 @@ const MapViewScreen = () => {
       description: 'Lotte Mart is a popular shopping destination in Hanoi.',
       latitude: 21.0759511,
       longitude: 105.8100871,
-      price: 125600,
+      price: 1256000,
     },
     {
       id: '3',
@@ -49,7 +49,7 @@ const MapViewScreen = () => {
       description: 'Vincom Center is a high-end shopping mall in Hanoi.',
       latitude: 21.0108794,
       longitude: 105.773362,
-      price: 150400,
+      price: 1504000,
     },
   ];
 
